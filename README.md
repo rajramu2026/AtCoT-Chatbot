@@ -1,103 +1,136 @@
-# Atlantic Coast Tours — Corrected GitHub Pages Deployment
+# Atlantic Coast Tours — GitHub Pages Deployment
 
-## Why the current website stopped working
+This repository contains the public Atlantic Coast Tours website and its live Gemini-powered tour assistant.
 
-There are two separate problems in the uploaded deployment:
+## Required GitHub files
 
-1. The GitHub file is named `app (1).js`, but `index.html` requests `app.js`. Because those filenames are different, the browser does not load the JavaScript. The loading tour-card placeholders therefore remain on the page and the chatbot handlers are not started.
-2. The current Apps Script `/exec` deployment redirects unauthenticated visitors to Google sign-in. A public GitHub Pages chatbot cannot use that deployment until Web App access is set to **Anyone**.
-
-The corrected version also loads both the tour cards and chatbot responses through Apps Script. It no longer asks the browser to download the Google Sheet CSV directly.
-
-## Files for GitHub
-
-The repository root must contain these exact filenames:
+Upload these exact filenames to the repository root:
 
 ```text
 index.html
 styles.css
 app.js
 README.md
-CA2 - Atlantic Coast Tours.xlsx
 ```
 
-Delete `app (1).js`. Upload the supplied corrected file using the exact name `app.js`.
-
-Do not rename it to `app (1).js`, `app.js.txt`, or any other name.
-
-The Excel file is an unchanged static reference copy. Live website data comes from the assigned online Google Sheet through Apps Script.
-
-## Google Apps Script update
-
-`Code.gs` is installed in Google Apps Script, not in the GitHub repository.
-
-1. Open the Apps Script project.
-2. Replace everything in `Code.gs` with the supplied corrected `Code.gs`.
-3. Save.
-4. Open **Project Settings → Script Properties**.
-5. Confirm these properties exist:
+Delete any duplicate or incorrectly named JavaScript files, especially:
 
 ```text
-GEMINI_API_KEY = your private Gemini API key
-GEMINI_MODEL = gemini-3.5-flash-lite
+app (1).js
+app.js.txt
 ```
 
-6. Select **Deploy → Manage deployments**.
-7. Edit the Web App deployment.
-8. Select **New version**.
-9. Confirm:
-   - Execute as: **Me**
-   - Who has access: **Anyone**
-10. Select **Deploy**.
-11. Copy the deployed Web App URL ending in `/exec`.
+The website must contain exactly one active frontend JavaScript file named `app.js`.
 
-The supplied `app.js` currently contains the `/exec` URL from the uploaded `app (1).js`. If deployment creates a different URL, update only this line near the top of `app.js`:
+## Current frontend version
 
-```javascript
-const APPS_SCRIPT_WEB_APP_URL =
-  "PASTE_THE_NEW_EXEC_URL_HERE";
+The supplied `index.html` loads:
+
+```html
+<link rel="stylesheet" href="styles.css?v=9" />
+<script src="app.js?v=9"></script>
 ```
 
-## GitHub update
+The `v=9` query values force browsers and GitHub Pages to fetch the updated files instead of reusing an older cached copy.
 
-1. Delete `app (1).js` from GitHub.
-2. Upload the supplied `app.js` using that exact filename.
-3. Replace `index.html` with the supplied version.
-4. Keep or replace `styles.css` with the supplied copy.
-5. Replace `README.md` with this file.
-6. Commit the changes.
-7. Wait for GitHub Pages deployment to finish.
-8. Hard-refresh the website:
-   - Windows: `Ctrl + Shift + R`
+## Apps Script connection
+
+The supplied `app.js` is configured to use this Google Apps Script Web App deployment:
+
+```text
+https://script.google.com/macros/s/AKfycbxu4sWYZqMcnRecay1NyF5vX-f3oFtSUh6qgQBdkUdzn3-Bt3bXtQV4tMtKEpiaoB44/exec
+```
+
+`Code.gs` belongs in Google Apps Script and must not be uploaded to GitHub.
+
+For the public website to work, deploy the current `Code.gs` as a Web App with:
+
+- **Execute as:** Me
+- **Who has access:** Anyone
+- **Version:** New version containing the latest saved `Code.gs`
+
+If Apps Script generates a different `/exec` URL, replace only the value of `APPS_SCRIPT_WEB_APP_URL` near the top of `app.js`.
+
+## Live-data behavior
+
+- Tour cards request `action=tours` through Apps Script.
+- Chat questions request `action=chat` through Apps Script.
+- Apps Script fetches the assigned Google Sheet for every chatbot question.
+- Gemini correlates the natural-language question with the appropriate live rows.
+- Trusted Apps Script code constructs business answers from exact Sheet values.
+- Blank, `NaN`, `null`, and unavailable values are not presented as valid business data.
+
+## Upload instructions
+
+1. Open the GitHub repository.
+2. Delete the existing `index.html`, `styles.css`, and `app.js` if necessary.
+3. Delete `app (1).js` if it exists.
+4. Upload the supplied files using the exact names:
+   - `index.html`
+   - `styles.css`
+   - `app.js`
+   - `README.md`
+5. Commit the changes.
+6. Wait for the GitHub Pages deployment to complete.
+7. Hard-refresh the published website:
+   - Windows/Linux: `Ctrl + Shift + R`
    - macOS: `Cmd + Shift + R`
 
-The corrected `index.html` loads `app.js?v=7` and `styles.css?v=7` so browsers do not reuse older cached files. The chat window is now visible by default and no longer depends on a JavaScript animation class. If JavaScript fails, the question box remains visible with a clear loading message instead of disappearing.
+Do not paste extra characters before the first line of `app.js`. It must begin with:
+
+```javascript
+/* Atlantic Coast Tours
+```
+
+It must not begin with `X`, a backtick, or Markdown code-fence characters.
 
 ## Required tests
 
-### Tour cards
+### 1. Interface
 
-Open the website. The loading cards must be replaced by current live tour cards.
+- The chatbot question box is visible immediately.
+- The input and **Ask AtCoT** button become enabled.
+- No JavaScript syntax error appears in the browser console.
 
-### Chatbot
+### 2. Tour cards
+
+The loading placeholders should be replaced by current tour cards returned through Apps Script.
+
+### 3. Chatbot
 
 Ask:
 
 ```text
-ACT017
+Tell me about ACT017
 ```
 
-The answer must return the complete ACT017 row from the current Google Sheet.
+The answer should use the complete current ACT017 row from the online Google Sheet.
 
-### Live update
+### 4. Fresh update
 
-1. Change an ACT017 value in the online Google Sheet.
+1. Change a value for ACT017 in the online Google Sheet.
 2. Save the Sheet.
-3. Ask `ACT017` again.
-4. The next response must show the changed value and a new Sheet-fetch time.
+3. Ask about ACT017 again.
+4. The next answer should show the new value and a new Sheet-fetch time.
 
-## If an error remains
+## Troubleshooting
 
-- **Apps Script Web App did not respond:** deployment access is not set to Anyone, the deployment is stale, or the `/exec` URL is wrong.
-- **Apps Script is running an older Code.gs version:** replace `Code.gs`, save, and deploy a New version.
-- **The page still shows Loading live tours:** confirm the repository has `app.js` exactly and that `index.html` contains `<script src="app.js?v=6"></script>`.
+### `Unexpected identifier 'Photo'`
+
+An older `app.js` accidentally began with `X` and a backtick. Replace the entire file with the supplied `app.js`. The current version does not use the failing photo-request code or JavaScript template literals.
+
+### `Apps Script is running an older Code.gs version`
+
+Save the latest `Code.gs`, select **Deploy → Manage deployments**, choose **New version**, and deploy again with access set to **Anyone**.
+
+### `The live service did not respond`
+
+Confirm that the Apps Script deployment is public, the `/exec` URL in `app.js` is current, and opening the `/exec` URL in a private browser window does not require Google sign-in.
+
+### Loading cards never disappear
+
+Confirm that GitHub contains a file named exactly `app.js` and that the published page source contains:
+
+```html
+<script src="app.js?v=9"></script>
+```
