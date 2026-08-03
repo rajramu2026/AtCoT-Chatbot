@@ -98,6 +98,47 @@ a{text-decoration:none;color:inherit;}
 .sparkle.s3{top:28%;right:12%;font-size:1rem;animation-delay:1s;}
 .sparkle.s4{top:72%;right:8%;font-size:.9rem;animation-delay:1.6s;}
 .sparkle.s5{top:12%;right:32%;font-size:.7rem;animation-delay:2.1s;}
+.sparkle.s6{top:40%;left:24%;font-size:.85rem;animation-delay:.9s;}
+.sparkle.s7{top:82%;left:42%;font-size:1.05rem;animation-delay:1.9s;}
+.sparkle.s8{top:8%;right:50%;font-size:.75rem;animation-delay:2.6s;}
+.sparkle.s9{top:10%;right:6%;font-size:1.2rem;animation-delay:.3s;}
+.sparkle.s10{bottom:8%;left:4%;font-size:.9rem;animation-delay:1.4s;}
+
+/* Small twinkling flourish tucked beside the header logo */
+.logo{position:relative;}
+.sparkle-logo{
+  position:absolute;top:-6px;right:-16px;color:#ffe9a8;font-size:.9rem;
+  text-shadow:0 0 8px rgba(255,224,140,.9);animation:twinkle 2.2s ease-in-out infinite;
+  pointer-events:none;
+}
+
+/* ---- Inline lighthouse icon inside buttons (nav CTA, hero CTA) ---- */
+.btn-with-icon{display:inline-flex;align-items:center;gap:9px;}
+.btn-badge{width:20px;height:20px;box-shadow:0 0 0 1.5px rgba(224,166,56,.5), 0 0 8px rgba(224,166,56,.3);}
+.btn-badge .lh-light{width:3.5px;height:3.5px;margin-bottom:.5px;}
+.btn-badge .lh-cap{width:5px;height:2.5px;}
+.btn-badge .lh-tower{width:4.5px;height:8.5px;}
+.btn-badge .lh-tower::before{height:2px;}
+.btn-badge .lh-base{width:7px;height:1.5px;margin-top:.5px;}
+
+/* ---- Extra-gold glittering section headings ---- */
+.glitter-heading{position:relative;display:inline-block;}
+.glitter-heading::after{
+  content:"";display:block;height:4px;width:64px;margin-top:8px;border-radius:999px;
+  background:linear-gradient(100deg, var(--gold) 10%, #fff6d8 35%, #ffe9a8 50%, var(--gold) 75%);
+  background-size:220% 100%;animation:goldGlint 2.6s linear infinite;
+}
+.glitter-heading::before{
+  content:"✨";position:absolute;top:-14px;right:-26px;font-size:1rem;
+  animation:twinkle 2s ease-in-out infinite;text-shadow:0 0 8px rgba(255,224,140,.9);
+}
+.glitter-heading-dark::after{
+  box-shadow:0 0 10px rgba(224,166,56,.5);
+}
+.sparkle-inline{
+  display:inline-block;font-size:.85rem;animation:twinkle 2.4s ease-in-out infinite;
+  text-shadow:0 0 8px rgba(255,224,140,.9);
+}
 @keyframes twinkle{0%,100%{opacity:.15;transform:scale(.7);}50%{opacity:1;transform:scale(1.15);}}
 
 /* Gold shimmer sweep across the main call-to-action buttons */
@@ -119,9 +160,15 @@ a{text-decoration:none;color:inherit;}
 .tour-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px;margin-top:36px;}
 .tour-card{
   background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);
-  overflow:hidden;transition:transform .2s ease;
+  overflow:hidden;transition:transform .2s ease;position:relative;
 }
 .tour-card:hover{transform:translateY(-6px);}
+.tour-card::after{
+  content:"✨";position:absolute;top:10px;right:10px;z-index:3;font-size:1.1rem;
+  opacity:0;transition:opacity .3s ease;text-shadow:0 0 10px rgba(255,224,140,.9);
+  pointer-events:none;
+}
+.tour-card:hover::after{opacity:1;animation:twinkle 1.3s ease-in-out infinite;}
 .tour-img{
   height:210px;background-size:cover;background-position:center;position:relative;
   background-color:var(--deep-sea);overflow:hidden;
@@ -142,7 +189,20 @@ a{text-decoration:none;color:inherit;}
 .tour-img.dingle{background-image:linear-gradient(135deg,#123f3a,#2f8f6f);}
 .tour-img.kerry{background-image:linear-gradient(135deg,#154b3f,#3aa07a);}
 .tour-img.burren{background-image:linear-gradient(135deg,#3a3a2e,#8a8a63);}
+.tour-img.fjord{background-image:linear-gradient(135deg,#0c3a4f,#2f8fae);}
+.tour-img.skyroad{background-image:linear-gradient(135deg,#3a2f10,#c98a1f);}
+.tour-img.castle{background-image:linear-gradient(135deg,#3a3226,#8c7a4e);}
+.tour-img.lighthouse{background-image:linear-gradient(135deg,#1c2a3a,#c1443a);}
+.tour-img.westport{background-image:linear-gradient(135deg,#1e4a3a,#5aa06a);}
 .tour-img.generic{background-image:linear-gradient(135deg,#0b3d3a,#136f63);}
+
+.category-badge{
+  position:absolute;left:14px;top:14px;z-index:2;color:var(--deep-sea);
+  font-family:'Poppins',sans-serif;font-weight:700;font-size:.68rem;letter-spacing:.04em;
+  text-transform:uppercase;background:rgba(255,246,224,.92);
+  padding:4px 11px;border-radius:999px;border:1px solid rgba(224,166,56,.6);
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
 
 /* Real landmark photo: fades in and gently zooms on hover once loaded,
    with a soft bottom vignette (::after) so every photo — regardless of its
@@ -307,4 +367,16 @@ a{text-decoration:none;color:inherit;}
   .hero h1{font-size:2rem;}
   .hero{padding:90px 0 100px;}
   .chat-messages{height:320px;}
+}
+
+/* ---- Scroll-reveal: tasteful fade + rise as sections/cards enter view ---- */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s ease;}
+.reveal.revealed{opacity:1;transform:translateY(0);}
+.tour-grid .reveal:nth-child(2){transition-delay:.08s;}
+.tour-grid .reveal:nth-child(3){transition-delay:.16s;}
+.tour-grid .reveal:nth-child(4){transition-delay:.24s;}
+.tour-grid .reveal:nth-child(5){transition-delay:.32s;}
+.tour-grid .reveal:nth-child(6){transition-delay:.4s;}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1;transform:none;transition:none;}
 }

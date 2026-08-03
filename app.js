@@ -342,20 +342,28 @@ async function renderTourCards() {
     /tour(\s|$)/i,
   ]);
   const titleCol = nameIdx !== -1 ? nameIdx : 0;
+  const idIdx = findColumnIndex(header, [/tour[\s_-]?id/i, /^id$/i]);
+  const categoryIdx = findColumnIndex(header, [/category/i, /type/i]);
 
   // Show real tours from the live sheet.
   const candidates = dataRows
-    .map((r) => ({ row: r, title: (r[titleCol] || "").trim() }))
+    .map((r) => ({
+      row: r,
+      title: (r[titleCol] || "").trim(),
+      tourId: idIdx !== -1 ? (r[idIdx] || "").trim().toUpperCase() : "",
+      category: categoryIdx !== -1 ? (r[categoryIdx] || "").trim() : "",
+    }))
     .filter((c) => c.title);
 
   grid.innerHTML = "";
   const toShow = candidates.slice(0, 6);
 
   // Guarantee every visible card gets its OWN distinct, attractive landmark
-  // photo. We still respect a real place mentioned in the tour's own row
-  // text first — but if that place has already been used on an earlier
-  // card (or nothing specific was detected), we hand out the next unused
-  // landmark from our curated fallback list instead of repeating one photo.
+  // photo. Priority order: (1) an explicit, verified tour_id → landmark
+  // mapping — the most reliable, zero-guesswork option for the real tours
+  // in the official sheet; (2) a place genuinely named in the row's own
+  // text; (3) if neither gives something new, the next unused landmark
+  // from our curated fallback list, so nobody ever repeats a photo.
   const usedWikis = new Set();
   let fallbackCursor = 0;
   function nextUnusedFallback() {
@@ -369,8 +377,8 @@ async function renderTourCards() {
     return LANDMARK_FALLBACK_ORDER[fallbackCursor++ % LANDMARK_FALLBACK_ORDER.length];
   }
 
-  for (const { row, title } of toShow) {
-    let place = detectPlace(row.join(" | "));
+  for (const { row, title, tourId, category } of toShow) {
+    let place = (tourId && TOUR_ID_PLACES[tourId]) || detectPlace(row.join(" | "));
     if (place === DEFAULT_PLACE || usedWikis.has(place.wiki)) {
       place = nextUnusedFallback();
     }
@@ -380,7 +388,7 @@ async function renderTourCards() {
     const duration = extractDurationLike(row);
 
     const card = document.createElement("div");
-    card.className = "tour-card";
+    card.className = "tour-card reveal";
 
     // .tour-img carries a branded gradient fallback via its place class
     // (see styles.css) so the card never looks "broken" while the real
@@ -393,6 +401,13 @@ async function renderTourCards() {
     photo.alt = `${place.label} — ${title}`;
     photo.loading = "lazy";
     img.appendChild(photo);
+
+    if (category) {
+      const badge = document.createElement("span");
+      badge.className = "category-badge";
+      badge.textContent = category;
+      img.appendChild(badge);
+    }
 
     const placeLabel = document.createElement("span");
     placeLabel.className = "place-label";
@@ -442,6 +457,31 @@ async function renderTourCards() {
       }
     });
   }
+
+  revealOnScroll();
+}
+
+/** Gently fades/slides ".reveal" elements into view as they enter the
+ *  viewport — small, tasteful UX polish, no dependency needed. */
+function revealOnScroll() {
+  const targets = document.querySelectorAll(".reveal:not(.revealed)");
+  if (!targets.length) return;
+  if (!("IntersectionObserver" in window)) {
+    targets.forEach((el) => el.classList.add("revealed"));
+    return;
+  }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("revealed");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
+  targets.forEach((el) => observer.observe(el));
 }
 
 function buildSystemPrompt() {
@@ -613,6 +653,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 (async function init() {
   liveDot.style.color = "#f59e0b"; // amber while loading
+  revealOnScroll(); // catch static sections (about, chat widget) right away
   setHeroPhoto();
   setAboutPhoto();
   await fetchLiveData();
