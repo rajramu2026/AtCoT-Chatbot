@@ -44,7 +44,7 @@ const CONFIG = {
 
   // ---- Language model (called directly from the browser) -----------------
   // Paste your OpenAI API key here. Read the security note above first.
-  OPENAI_API_KEY: "REPLACE-WITH-YOUR-OPENAI-API-KEY",
+  OPENAI_API_KEY: "AQ.Ab8RN6JUEdVbiyKTaQ9EYZe8ZWF44fulHsfm9hDXzho_j87Hrg",
   MODEL: "gpt-4o-mini",
 
   BUSINESS_NAME: "Atlantic Coast Tours",
