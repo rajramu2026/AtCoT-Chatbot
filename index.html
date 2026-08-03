@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Atlantic Coast Tours | West of Ireland Day Tours & Private Tours</title>
+<meta name="description" content="Atlantic Coast Tours – authentic day tours, private tours and multi-day adventures along the Wild Atlantic Way, West of Ireland. Ask our live assistant about prices, dates & availability." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a class="logo" href="#top">
+      <span class="logo-mark">⚓</span>
+      <span class="logo-text">Atlantic Coast <strong>Tours</strong></span>
+    </a>
+    <nav class="main-nav">
+      <a href="#tours">Tours</a>
+      <a href="#about">About</a>
+      <a href="#chat">Ask Us</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="#chat" class="btn btn-primary nav-cta">💬 Chat With Us</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero-overlay"></div>
+  <div class="container hero-inner">
+    <p class="hero-eyebrow">West of Ireland · Wild Atlantic Way</p>
+    <h1>Real Ireland. Real Adventures.<br>Straight From the West Coast.</h1>
+    <p class="hero-sub">Day tours, private tours &amp; multi-day trips to the Cliffs of Moher, Connemara, the Aran Islands and beyond — booked and answered honestly, no guesswork.</p>
+    <div class="hero-actions">
+      <a href="#chat" class="btn btn-accent">💬 Ask Our Live Assistant</a>
+      <a href="#tours" class="btn btn-outline">See Tours</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TOURS TEASER ===== -->
+<section class="tours" id="tours">
+  <div class="container">
+    <h2>Popular Routes</h2>
+    <p class="section-sub">Real tours, straight from our live booking sheet — names, places and prices shown here update automatically whenever the sheet changes.</p>
+    <div class="tour-grid" id="tourGrid">
+      <div class="tour-card skeleton"><div class="tour-img"></div><h3>Loading live tours…</h3><p>Fetching the latest tours from our booking sheet.</p></div>
+      <div class="tour-card skeleton"><div class="tour-img"></div><h3>Loading live tours…</h3><p>Fetching the latest tours from our booking sheet.</p></div>
+      <div class="tour-card skeleton"><div class="tour-img"></div><h3>Loading live tours…</h3><p>Fetching the latest tours from our booking sheet.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="about" id="about">
+  <div class="container about-inner">
+    <div>
+      <h2>About Atlantic Coast Tours</h2>
+      <p>We're a West of Ireland tour operator built around one idea: show people the real Wild Atlantic Way, honestly and without the fuss. No overselling, no fine-print surprises — just good tours and straight answers.</p>
+      <p>That's also why our assistant below only ever answers from our own live booking sheet. If it's not confirmed in our system, it'll tell you so instead of guessing.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CHAT ===== -->
+<section class="chat-section" id="chat">
+  <div class="container">
+    <h2>Ask Us Anything</h2>
+    <p class="section-sub">Prices, tour dates, pickup points, availability — answered live from our official booking sheet.</p>
+
+    <div class="chat-widget" id="chatWidget">
+      <div class="chat-header">
+        <div class="chat-avatar">AC</div>
+        <div class="chat-header-text">
+          <strong>AtCoT</strong>
+          <span id="statusLine">Atlantic Coast Tours Assistant · <span id="liveDot">●</span> live</span>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg bot">
+          <div class="bubble">Dia dhuit! 👋 I'm AtCoT, the Atlantic Coast Tours assistant. Ask me about our tours, prices, dates or availability and I'll check it against our live booking sheet for you.</div>
+        </div>
+      </div>
+
+      <div class="chat-suggestions" id="chatSuggestions">
+        <button class="chip">What tours are running this week?</button>
+        <button class="chip">How much is the Cliffs of Moher tour?</button>
+        <button class="chip">Do you have any slots on Saturday?</button>
+        <button class="chip">Where does the tour depart from?</button>
+      </div>
+
+      <form class="chat-input-row" id="chatForm">
+        <input type="text" id="chatInput" autocomplete="off" placeholder="Type your question…" aria-label="Type your question" />
+        <button type="submit" class="btn btn-primary" id="sendBtn">Send</button>
+      </form>
+      <p class="chat-disclaimer">Answers are based only on Atlantic Coast Tours' official live data. If something isn't confirmed yet, AtCoT will say so rather than guess.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer" id="contact">
+  <div class="container footer-inner">
+    <div>
+      <div class="logo-text footer-logo">Atlantic Coast <strong>Tours</strong></div>
+      <p>West of Ireland · Wild Atlantic Way</p>
+    </div>
+    <div>
+      <p>Have a question our assistant couldn't answer? Reach out directly and our team will help.</p>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <p>© <span id="year"></span> Atlantic Coast Tours. All tour details are subject to the official booking sheet.</p>
+  </div>
+</footer>
+
+<!-- Floating chat launcher (mobile-friendly quick access) -->
+<a href="#chat" class="fab" id="fab" aria-label="Open chat">💬</a>
+
+<script src="app.js"></script>
+</body>
+</html>
