@@ -51,7 +51,7 @@ const CONFIG = {
 
   // ---- Language model (called directly from the browser) -----------------
   // Your Google AI Studio / Gemini API key. Read the security note above first.
-  GEMINI_API_KEY: "AQ.Ab8RN6JUEdVbiyKTaQ9EYZe8ZWF44fulHsfm9hDXzho_j87Hrg",
+  GEMINI_API_KEY: "AIzaSyA9sANXI9vCfftV9D9_goqJ__2bhWHBH0s",
   MODEL: "gemini-2.5-flash",
 
   BUSINESS_NAME: "Atlantic Coast Tours",
