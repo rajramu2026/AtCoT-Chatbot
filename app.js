@@ -353,6 +353,11 @@ function askAssistant(question) {
         reject(new Error(data.error));
       } else if (!data || !data.reply) {
         reject(new Error("The language model returned no answer."));
+      } else if (
+        data.liveDataUsed !== true ||
+        data.groundingMode !== "Gemini correlation + exact live-file rows"
+      ) {
+        reject(new Error("Google Apps Script is still running the older chatbot code. Deploy the new Code.gs as a new Web App version."));
       } else {
         resolve(data);
       }
@@ -394,7 +399,7 @@ async function handleUserQuestion(question) {
     appendMessage(
       "bot",
       data.reply,
-      `${data.model || "Gemini"} · ${formatFetchTime(data.sheetFetchedAt)}`
+      `${data.model || "Gemini"} · ${formatFetchTime(data.sheetFetchedAt)} · exact live-file rows`
     );
     setChatStatus("ready", "fresh Sheet per question");
 
@@ -403,6 +408,7 @@ async function handleUserQuestion(question) {
       model: data.model,
       sheetFetchedAt: data.sheetFetchedAt,
       liveDataUsed: data.liveDataUsed,
+      groundingMode: data.groundingMode,
     });
   } catch (error) {
     console.error(error);
