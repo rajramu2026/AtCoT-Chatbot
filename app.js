@@ -33,9 +33,9 @@ const CONFIG = {
   // One entry per tab you want the bot to read (Tours, Prices, FAQ, etc).
   // Find each tab's "gid" by clicking the tab and reading the number
   // after "gid=" in the browser's address bar. The first/default tab is
-  // usually gid=0.
+  // usually gid=0. This is set to the "Tours" tab you pointed us at.
   SHEETS: [
-    { name: "Bookings & Tours", gid: "0" }
+    { name: "Tours & Pricing", gid: "120683740" }
     // { name: "FAQ", gid: "123456789" },
   ],
 
@@ -44,11 +44,11 @@ const CONFIG = {
 
   // ---- Language model (called directly from the browser) -----------------
   // Paste your OpenAI API key here. Read the security note above first.
-  OPENAI_API_KEY: "AQ.Ab8RN6JUEdVbiyKTaQ9EYZe8ZWF44fulHsfm9hDXzho_j87Hrg",
+  OPENAI_API_KEY: "REPLACE-WITH-YOUR-OPENAI-API-KEY",
   MODEL: "gpt-4o-mini",
 
   BUSINESS_NAME: "Atlantic Coast Tours",
-  ASSISTANT_NAME: "Selkie", // Change this one line to rename the assistant everywhere.
+  ASSISTANT_NAME: "AtCoT", // Change this one line to rename the assistant everywhere.
 };
 
 /* ---------------------------------------------------------------------- */
@@ -100,20 +100,204 @@ function rowsToTable(rows, label) {
 
 async function fetchLiveData() {
   const parts = [];
+  liveData.sheetsRaw = liveData.sheetsRaw || {};
   for (const sheet of CONFIG.SHEETS) {
     try {
       const res = await fetch(sheetCsvUrl(sheet.gid), { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const csvText = await res.text();
       const rows = parseCSV(csvText);
+      liveData.sheetsRaw[sheet.name] = rows;
       parts.push(rowsToTable(rows, sheet.name));
     } catch (err) {
       console.error("Failed to fetch sheet tab", sheet.name, err);
       parts.push(`### ${sheet.name}\n(Could not load this data just now — treat as unavailable.)`);
     }
   }
-  liveData = { text: parts.join("\n\n"), fetchedAt: new Date() };
+  liveData.text = parts.join("\n\n");
+  liveData.fetchedAt = new Date();
   return liveData;
+}
+
+/* ------------------------- Live place photography ------------------------
+   Instead of guessing/hosting image URLs (which can go stale), we look up
+   a real, current photo for each named West-of-Ireland place directly from
+   Wikipedia's public, CORS-enabled API at page-load time. If a lookup ever
+   fails (offline, place not recognised, etc.) the card/hero simply keeps
+   its branded gradient background — nothing ever shows as "broken".
+   ------------------------------------------------------------------------- */
+
+const PLACES = [
+  { keywords: ["cliffs of moher", "moher"], wiki: "Cliffs of Moher", css: "cliffs" },
+  { keywords: ["connemara"], wiki: "Connemara", css: "connemara" },
+  { keywords: ["kylemore"], wiki: "Kylemore Abbey", css: "connemara" },
+  { keywords: ["achill"], wiki: "Achill Island", css: "connemara" },
+  { keywords: ["donegal", "slieve league"], wiki: "Slieve League", css: "connemara" },
+  { keywords: ["aran island", "aran islands", "inis m\u00f3r", "inishmore", "inisheer", "inis oirr"], wiki: "Aran Islands", css: "aran" },
+  { keywords: ["killarney"], wiki: "Killarney National Park", css: "aran" },
+  { keywords: ["galway"], wiki: "Galway", css: "cliffs" },
+  { keywords: ["westport", "croagh patrick"], wiki: "Westport, County Mayo", css: "cliffs" },
+  { keywords: ["doolin"], wiki: "Doolin", css: "doolin" },
+  { keywords: ["dingle"], wiki: "Dingle Peninsula", css: "dingle" },
+  { keywords: ["ring of kerry", "kerry"], wiki: "Ring of Kerry", css: "kerry" },
+  { keywords: ["burren"], wiki: "The Burren", css: "burren" },
+];
+const DEFAULT_PLACE = { wiki: "Wild Atlantic Way", css: "generic" };
+
+function detectPlace(text) {
+  const lower = (text || "").toLowerCase();
+  for (const place of PLACES) {
+    if (place.keywords.some((k) => lower.includes(k))) return place;
+  }
+  return DEFAULT_PLACE;
+}
+
+const photoCache = new Map();
+
+async function fetchPlacePhoto(wikiTitle) {
+  if (photoCache.has(wikiTitle)) return photoCache.get(wikiTitle);
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(
+      wikiTitle
+    )}&prop=pageimages&format=json&pithumbsize=1000&origin=*`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const pages = data?.query?.pages || {};
+    const page = Object.values(pages)[0];
+    const src = page?.thumbnail?.source || null;
+    photoCache.set(wikiTitle, src);
+    return src;
+  } catch (err) {
+    console.warn("Photo lookup failed for", wikiTitle, err);
+    photoCache.set(wikiTitle, null);
+    return null;
+  }
+}
+
+async function setHeroPhoto() {
+  const heroEl = document.getElementById("hero");
+  if (!heroEl) return;
+  const src = await fetchPlacePhoto("Cliffs of Moher");
+  if (src) {
+    // The section already has a dark scrim via .hero::before, so we can set
+    // the photo directly as the background image.
+    heroEl.style.backgroundImage = `url("${src}")`;
+  }
+}
+
+async function setAboutPhoto() {
+  const aboutEl = document.getElementById("about");
+  if (!aboutEl) return;
+  const src = await fetchPlacePhoto("Connemara");
+  if (src) {
+    aboutEl.style.backgroundImage = `url("${src}")`;
+  }
+}
+
+function findTourRows() {
+  // Use whichever configured sheet looks most like a tour list (first one, by default).
+  const sheetName = CONFIG.SHEETS[0]?.name;
+  const rows = (liveData.sheetsRaw && liveData.sheetsRaw[sheetName]) || [];
+  if (rows.length < 2) return [];
+  return rows.slice(1); // drop header row
+}
+
+function extractPriceLike(row) {
+  const text = row.join(" | ");
+  const match = text.match(/[€£$]\s?\d[\d,.]*(\s?(per|pp|each|group))?/i);
+  return match ? match[0].trim() : null;
+}
+
+function extractDurationLike(row) {
+  const text = row.join(" | ");
+  const match = text.match(/\d+(\.\d+)?\s?(hours?|hrs?|days?)/i);
+  return match ? match[0].trim() : null;
+}
+
+async function renderTourCards() {
+  const grid = document.getElementById("tourGrid");
+  if (!grid) return;
+  const rows = findTourRows();
+
+  if (!rows.length) {
+    grid.innerHTML = `<p class="loading-note">Live tour list isn't available right now — ask our assistant below and it'll check directly.</p>`;
+    return;
+  }
+
+  // Show real tours from the live sheet (first column = tour name).
+  const candidates = rows
+    .map((r) => ({ row: r, title: (r[0] || "").trim() }))
+    .filter((c) => c.title);
+
+  grid.innerHTML = "";
+  const toShow = candidates.slice(0, 6);
+
+  for (const { row, title } of toShow) {
+    const place = detectPlace(row.join(" | "));
+    const price = extractPriceLike(row);
+    const duration = extractDurationLike(row);
+
+    const card = document.createElement("div");
+    card.className = "tour-card";
+
+    const img = document.createElement("div");
+    img.className = `tour-img ${place.css}`;
+
+    const photoLayer = document.createElement("div");
+    photoLayer.className = "tour-img-photo";
+
+    const scrim = document.createElement("div");
+    scrim.className = "tour-img-scrim";
+
+    const placeLabel = document.createElement("span");
+    placeLabel.className = "tour-img-place";
+    placeLabel.textContent = place.wiki;
+
+    img.appendChild(photoLayer);
+    img.appendChild(scrim);
+    img.appendChild(placeLabel);
+
+    const h3 = document.createElement("h3");
+    h3.textContent = title;
+
+    const meta = document.createElement("div");
+    meta.className = "tour-meta";
+    if (price) {
+      const span = document.createElement("span");
+      span.textContent = price;
+      meta.appendChild(span);
+    }
+    if (duration) {
+      const span = document.createElement("span");
+      span.textContent = duration;
+      meta.appendChild(span);
+    }
+    if (!price && !duration) {
+      const span = document.createElement("span");
+      span.textContent = "Ask for live price & availability";
+      meta.appendChild(span);
+    }
+
+    const link = document.createElement("a");
+    link.href = "#chat";
+    link.className = "tour-link";
+    link.textContent = "Check price & slots →";
+
+    card.appendChild(img);
+    card.appendChild(h3);
+    card.appendChild(meta);
+    card.appendChild(link);
+    grid.appendChild(card);
+
+    // Best-effort real photo for this specific card; gradient + scrim stay if it fails.
+    fetchPlacePhoto(place.wiki).then((src) => {
+      if (src) {
+        photoLayer.style.backgroundImage = `url("${src}")`;
+        photoLayer.classList.add("loaded");
+      }
+    });
+  }
 }
 
 function buildSystemPrompt() {
@@ -251,7 +435,13 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 (async function init() {
   liveDot.style.color = "#f59e0b"; // amber while loading
+  setHeroPhoto();
+  setAboutPhoto();
   await fetchLiveData();
+  await renderTourCards();
   liveDot.style.color = "#4ade80"; // green once live
-  setInterval(fetchLiveData, CONFIG.REFRESH_MINUTES * 60 * 1000);
+  setInterval(async () => {
+    await fetchLiveData();
+    await renderTourCards();
+  }, CONFIG.REFRESH_MINUTES * 60 * 1000);
 })();

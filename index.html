@@ -29,7 +29,7 @@
 </header>
 
 <!-- ===== HERO ===== -->
-<section class="hero">
+<section class="hero" id="hero">
   <div class="hero-overlay"></div>
   <div class="container hero-inner">
     <p class="hero-eyebrow">West of Ireland · Wild Atlantic Way</p>
@@ -46,26 +46,11 @@
 <section class="tours" id="tours">
   <div class="container">
     <h2>Popular Routes</h2>
-    <p class="section-sub">Exact prices, dates and available slots are always kept live in our booking sheet — ask our assistant below for today's real numbers.</p>
-    <div class="tour-grid">
-      <div class="tour-card">
-        <div class="tour-img cliffs"></div>
-        <h3>Cliffs of Moher &amp; Galway</h3>
-        <p>A full-day classic along the Wild Atlantic Way.</p>
-        <a href="#chat" class="tour-link">Check price &amp; slots →</a>
-      </div>
-      <div class="tour-card">
-        <div class="tour-img connemara"></div>
-        <h3>Connemara &amp; Kylemore Abbey</h3>
-        <p>Mountains, lakes and the wild Connemara coastline.</p>
-        <a href="#chat" class="tour-link">Check price &amp; slots →</a>
-      </div>
-      <div class="tour-card">
-        <div class="tour-img aran"></div>
-        <h3>Aran Islands Day Trip</h3>
-        <p>Ferry crossing and a taste of island life.</p>
-        <a href="#chat" class="tour-link">Check price &amp; slots →</a>
-      </div>
+    <p class="section-sub">Real tours, straight from our live booking sheet — names, places and prices shown here update automatically whenever the sheet changes.</p>
+    <div class="tour-grid" id="tourGrid">
+      <div class="tour-card skeleton"><div class="tour-img"></div><h3>Loading live tours…</h3><p>Fetching the latest tours from our booking sheet.</p></div>
+      <div class="tour-card skeleton"><div class="tour-img"></div><h3>Loading live tours…</h3><p>Fetching the latest tours from our booking sheet.</p></div>
+      <div class="tour-card skeleton"><div class="tour-img"></div><h3>Loading live tours…</h3><p>Fetching the latest tours from our booking sheet.</p></div>
     </div>
   </div>
 </section>
@@ -89,16 +74,16 @@
 
     <div class="chat-widget" id="chatWidget">
       <div class="chat-header">
-        <div class="chat-avatar">🦭</div>
+        <div class="chat-avatar">AC</div>
         <div class="chat-header-text">
-          <strong>Selkie</strong>
+          <strong>AtCoT</strong>
           <span id="statusLine">Atlantic Coast Tours Assistant · <span id="liveDot">●</span> live</span>
         </div>
       </div>
 
       <div class="chat-messages" id="chatMessages">
         <div class="msg bot">
-          <div class="bubble">Dia dhuit! 👋 I'm Selkie, the Atlantic Coast Tours assistant. Ask me about our tours, prices, dates or availability and I'll check it against our live booking sheet for you.</div>
+          <div class="bubble">Dia dhuit! 👋 I'm AtCoT, the Atlantic Coast Tours assistant. Ask me about our tours, prices, dates or availability and I'll check it against our live booking sheet for you.</div>
         </div>
       </div>
 
@@ -113,7 +98,7 @@
         <input type="text" id="chatInput" autocomplete="off" placeholder="Type your question…" aria-label="Type your question" />
         <button type="submit" class="btn btn-primary" id="sendBtn">Send</button>
       </form>
-      <p class="chat-disclaimer">Answers are based only on Atlantic Coast Tours' official live data. If something isn't confirmed yet, Aisling will say so rather than guess.</p>
+      <p class="chat-disclaimer">Answers are based only on Atlantic Coast Tours' official live data. If something isn't confirmed yet, AtCoT will say so rather than guess.</p>
     </div>
   </div>
 </section>
